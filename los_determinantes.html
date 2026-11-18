@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>LOS DETERMINANTES</title>
+    <style>
+        @font-face {
+            font-family: 'Escolar';
+            src: url('Escolar_N.TTF') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --primary: #1a5f7a;
+            --primary-dark: #0d3b4d;
+            --secondary: #57c5b6;
+            --accent: #ff6b35;
+            --accent2: #f7c59f;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #f0f7f4;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --shadow: 0 10px 30px rgba(26, 95, 122, 0.12);
+            --radius: 20px;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: 'Escolar', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f7f4 50%, #fef3c7 100%);
+            color: var(--text);
+            user-select: none;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            padding: var(--safe-top) 0 var(--safe-bottom);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(26,95,122,0.1);
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: clamp(1.1rem, 4vw, 1.6rem);
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, background 0.2s;
+        }
+
+        .header-btn:active { transform: scale(0.92); }
+        .header-btn.secondary { background: var(--secondary); }
+
+        .screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .screen.active { display: flex; }
+
+        #home {
+            padding: 20px;
+            overflow-y: auto;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 16px;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin: 10px 0 20px;
+        }
+        .logo-area .icon { font-size: clamp(3rem, 12vw, 5rem); margin-bottom: 8px; }
+        .logo-area h2 {
+            font-size: clamp(1.8rem, 6vw, 2.8rem);
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+        .logo-area p {
+            color: var(--text-light);
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .menu-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-height: 90px;
+        }
+        .menu-card:active { transform: scale(0.97); }
+        .menu-card:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 15px 40px rgba(26, 95, 122, 0.18);
+        }
+        .menu-card .emoji { font-size: 2.4rem; flex-shrink: 0; }
+        .menu-card .info h3 {
+            font-size: 1.15rem;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+        .menu-card .info p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        .menu-card.challenge {
+            background: linear-gradient(135deg, var(--primary) 0%, #159895 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+        .menu-card.challenge .info h3,
+        .menu-card.challenge .info p { color: white; }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 12px 16px;
+            overflow-y: auto;
+            gap: 12px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: rgba(26,95,122,0.12);
+            border-radius: 20px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            border-radius: 20px;
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            color: var(--text-light);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .stats .score {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .word-display {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+        }
+        .word-display .label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .word-display .word {
+            font-size: clamp(2.2rem, 10vw, 3.5rem);
+            font-weight: 700;
+            color: var(--primary);
+            word-break: break-word;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            flex: 1;
+            align-content: start;
+        }
+
+        .option-btn {
+            background: var(--card);
+            border: 3px solid transparent;
+            border-radius: 16px;
+            padding: 18px 12px;
+            font-family: inherit;
+            font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+            font-weight: 600;
+            color: var(--primary-dark);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .option-btn:active { transform: scale(0.96); }
+        .option-btn.correct {
+            background: var(--success);
+            color: white;
+            border-color: #27ae60;
+        }
+        .option-btn.wrong {
+            background: var(--error);
+            color: white;
+            border-color: #c0392b;
+            animation: shake 0.45s ease;
+        }
+
+        .sentence-box {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px 16px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .sentence-box .instruction {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+        .sentence {
+            font-size: clamp(1.3rem, 5vw, 1.9rem);
+            line-height: 1.7;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px 4px;
+        }
+        .sentence .word {
+            padding: 6px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .sentence .word:hover,
+        .sentence .word:active {
+            background: rgba(87, 197, 182, 0.2);
+        }
+        .sentence .word.selected {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .sentence .word.correct {
+            background: var(--success);
+            color: white;
+            border-color: #27ae60;
+        }
+        .sentence .word.done {
+            background: #27ae60;
+            color: white;
+            border-color: #1e8449;
+            opacity: 0.85;
+            pointer-events: none;
+        }
+        .sentence .word.wrong {
+            background: var(--error);
+            color: white;
+            animation: shake 0.4s ease;
+        }
+        .sentence .word.analyzing {
+            background: #f39c12;
+            color: white;
+            border-color: #e67e22;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.35);
+        }
+
+        .targets-info {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 10px;
+            min-height: 1.2em;
+        }
+
+        .extra-options {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .extra-options.visible { display: flex; }
+
+        .extra-group {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: var(--shadow);
+        }
+        .extra-group h4 {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .extra-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .extra-btn {
+            padding: 12px 18px;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            background: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 90px;
+        }
+        .extra-btn:active { transform: scale(0.95); }
+        .extra-btn.selected {
+            background: var(--primary);
+            color: white;
+        }
+        .extra-btn.correct {
+            background: var(--success);
+            border-color: #27ae60;
+            color: white;
+        }
+        .extra-btn.wrong {
+            background: var(--error);
+            border-color: #c0392b;
+            color: white;
+            animation: shake 0.4s;
+        }
+
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: white;
+            padding: 28px 36px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            text-align: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 90vw;
+        }
+        .feedback.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+        .feedback .emoji { font-size: 3.5rem; margin-bottom: 10px; }
+        .feedback .msg {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+        .feedback .sub {
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        .level-select {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 30px 20px;
+            flex: 1;
+        }
+        .level-select h2 {
+            font-size: clamp(1.4rem, 5vw, 1.8rem);
+            color: var(--primary);
+            text-align: center;
+        }
+        .level-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+        }
+        .level-btn {
+            background: var(--card);
+            border: none;
+            border-radius: 20px;
+            padding: 24px 32px;
+            min-width: 180px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-align: center;
+        }
+        .level-btn:active { transform: scale(0.96); }
+        .level-btn .num {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .level-btn .desc {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 6px;
+        }
+
+        .end-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 30px;
+            text-align: center;
+            flex: 1;
+        }
+        .end-screen .big-emoji { font-size: 5rem; }
+        .end-screen h2 { font-size: 2rem; color: var(--primary); }
+        .end-screen .final-score { font-size: 1.5rem; color: var(--text); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #159895);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 16px 36px;
+            font-family: inherit;
+            font-size: 1.15rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(26,95,122,0.3);
+            transition: transform 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.96); }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            15% { transform: translateX(-8px); }
+            30% { transform: translateX(8px); }
+            45% { transform: translateX(-6px); }
+            60% { transform: translateX(6px); }
+            75% { transform: translateX(-3px); }
+        }
+
+        @media (max-width: 480px) {
+            .menu-grid { grid-template-columns: 1fr; }
+            .options-grid { grid-template-columns: 1fr 1fr; }
+            .header { padding: 10px 12px; }
+        }
+        @media (orientation: landscape) and (max-height: 500px) {
+            .logo-area { margin: 4px 0 8px; }
+            .logo-area .icon { font-size: 2rem; }
+            .word-display { padding: 16px; }
+            .word-display .word { font-size: 2rem; }
+            .sentence-box { padding: 14px; }
+            .menu-card { min-height: 70px; padding: 14px; }
+        }
+        @media (min-width: 900px) {
+            .game-container {
+                max-width: 900px;
+                margin: 0 auto;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <button class="header-btn secondary" id="btnBack" title="Volver" style="visibility:hidden">←</button>
+        <h1 id="headerTitle">LOS DETERMINANTES</h1>
+        <button class="header-btn" id="btnFullscreen" title="Pantalla completa">⛶</button>
+    </header>
+
+    <div id="home" class="screen active">
+        <div class="logo-area">
+            <div class="icon">📚</div>
+            <h2>LOS DETERMINANTES</h2>
+            <p>¡Aprende jugando con los determinantes del español!</p>
+        </div>
+        <div class="menu-grid">
+            <div class="menu-card" data-game="clasificar">
+                <div class="emoji">🎯</div>
+                <div class="info">
+                    <h3>Clasificar determinantes</h3>
+                    <p>Identifica el tipo de cada determinante</p>
+                </div>
+            </div>
+            <div class="menu-card" data-game="articulos">
+                <div class="emoji">🅰️</div>
+                <div class="info">
+                    <h3>Artículos</h3>
+                    <p>Nivel 1 y 2 · 30 oraciones</p>
+                </div>
+            </div>
+            <div class="menu-card" data-game="demostrativos">
+                <div class="emoji">👆</div>
+                <div class="info">
+                    <h3>Demostrativos</h3>
+                    <p>Nivel 1 y 2 · 30 oraciones</p>
+                </div>
+            </div>
+            <div class="menu-card" data-game="posesivos">
+                <div class="emoji">❤️</div>
+                <div class="info">
+                    <h3>Posesivos</h3>
+                    <p>Nivel 1 y 2 · 30 oraciones</p>
+                </div>
+            </div>
+            <div class="menu-card" data-game="numerales">
+                <div class="emoji">🔢</div>
+                <div class="info">
+                    <h3>Numerales</h3>
+                    <p>Nivel 1 y 2 · 30 oraciones</p>
+                </div>
+            </div>
+            <div class="menu-card" data-game="indefinidos">
+                <div class="emoji">❓</div>
+                <div class="info">
+                    <h3>Indefinidos</h3>
+                    <p>Nivel 1 · 30 oraciones</p>
+                </div>
+            </div>
+            <div class="menu-card challenge" data-game="desafio">
+                <div class="emoji">🏆</div>
+                <div class="info">
+                    <h3>Modo Desafío</h3>
+                    <p>¡120 oraciones mezcladas! Identifica el tipo de cada determinante</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="levelSelect" class="screen">
+        <div class="level-select">
+            <h2 id="levelTitle">Elige el nivel</h2>
+            <div class="level-btns">
+                <button class="level-btn" data-level="1">
+                    <div class="num">Nivel 1</div>
+                    <div class="desc" id="level1Desc">Toca el determinante</div>
+                </button>
+                <button class="level-btn" data-level="2">
+                    <div class="num">Nivel 2</div>
+                    <div class="desc" id="level2Desc">Análisis completo</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game" class="screen">
+        <div class="game-container">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="stats">
+                <span id="progressText">0 / 0</span>
+                <span class="score">⭐ <span id="scoreVal">0</span></span>
+            </div>
+
+            <div id="classifyContent" style="display:none; flex-direction:column; gap:14px; flex:1;">
+                <div class="word-display">
+                    <div class="label">¿Qué tipo de determinante es?</div>
+                    <div class="word" id="classifyWord">el</div>
+                </div>
+                <div class="options-grid" id="classifyOptions"></div>
+            </div>
+
+            <div id="sentenceContent" style="display:none; flex-direction:column; gap:12px; flex:1;">
+                <div class="sentence-box">
+                    <div class="instruction" id="sentenceInstruction">Toca la palabra que es el determinante</div>
+                    <div class="sentence" id="sentenceWords"></div>
+                    <div class="targets-info" id="targetsInfo"></div>
+                </div>
+                <div class="extra-options" id="extraOptions"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="end" class="screen">
+        <div class="end-screen">
+            <div class="big-emoji" id="endEmoji">🎉</div>
+            <h2 id="endTitle">¡Completado!</h2>
+            <p class="final-score">Puntuación: <strong id="endScore">0</strong></p>
+            <p id="endMessage">¡Excelente trabajo!</p>
+            <button class="btn-primary" id="btnHome">Volver al inicio</button>
+        </div>
+    </div>
+
+    <div class="feedback" id="feedback">
+        <div class="emoji" id="fbEmoji">👍</div>
+        <div class="msg" id="fbMsg">¡Muy bien!</div>
+        <div class="sub" id="fbSub"></div>
+    </div>
+
+    <script>
+    const TIPOS = ['artículo', 'demostrativo', 'posesivo', 'numeral', 'indefinido'];
+
+    // ========== CLASIFICACIÓN ==========
+    const clasificacionItems = [
+        {w:'el', t:'artículo'}, {w:'la', t:'artículo'}, {w:'los', t:'artículo'}, {w:'las', t:'artículo'},
+        {w:'un', t:'artículo'}, {w:'una', t:'artículo'}, {w:'unos', t:'artículo'}, {w:'unas', t:'artículo'},
+        {w:'lo', t:'artículo'},
+        {w:'este', t:'demostrativo'}, {w:'esta', t:'demostrativo'}, {w:'estos', t:'demostrativo'}, {w:'estas', t:'demostrativo'},
+        {w:'ese', t:'demostrativo'}, {w:'esa', t:'demostrativo'}, {w:'esos', t:'demostrativo'}, {w:'esas', t:'demostrativo'},
+        {w:'aquel', t:'demostrativo'}, {w:'aquella', t:'demostrativo'}, {w:'aquellos', t:'demostrativo'}, {w:'aquellas', t:'demostrativo'},
+        {w:'mi', t:'posesivo'}, {w:'mis', t:'posesivo'}, {w:'tu', t:'posesivo'}, {w:'tus', t:'posesivo'},
+        {w:'su', t:'posesivo'}, {w:'sus', t:'posesivo'},
+        {w:'nuestro', t:'posesivo'}, {w:'nuestra', t:'posesivo'}, {w:'nuestros', t:'posesivo'}, {w:'nuestras', t:'posesivo'},
+        {w:'vuestro', t:'posesivo'}, {w:'vuestra', t:'posesivo'}, {w:'vuestros', t:'posesivo'}, {w:'vuestras', t:'posesivo'},
+        {w:'uno', t:'numeral'}, {w:'dos', t:'numeral'}, {w:'tres', t:'numeral'}, {w:'cuatro', t:'numeral'},
+        {w:'cinco', t:'numeral'}, {w:'seis', t:'numeral'}, {w:'siete', t:'numeral'}, {w:'ocho', t:'numeral'},
+        {w:'nueve', t:'numeral'}, {w:'diez', t:'numeral'}, {w:'veinte', t:'numeral'}, {w:'cien', t:'numeral'},
+        {w:'primer', t:'numeral'}, {w:'primero', t:'numeral'}, {w:'segunda', t:'numeral'}, {w:'tercero', t:'numeral'},
+        {w:'cuarta', t:'numeral'}, {w:'quinto', t:'numeral'}, {w:'décimo', t:'numeral'},
+        {w:'algún', t:'indefinido'}, {w:'alguna', t:'indefinido'}, {w:'algunos', t:'indefinido'}, {w:'algunas', t:'indefinido'},
+        {w:'ningún', t:'indefinido'}, {w:'ninguna', t:'indefinido'},
+        {w:'todo', t:'indefinido'}, {w:'toda', t:'indefinido'}, {w:'todos', t:'indefinido'}, {w:'todas', t:'indefinido'},
+        {w:'mucho', t:'indefinido'}, {w:'mucha', t:'indefinido'}, {w:'muchos', t:'indefinido'}, {w:'muchas', t:'indefinido'},
+        {w:'poco', t:'indefinido'}, {w:'poca', t:'indefinido'}, {w:'pocos', t:'indefinido'}, {w:'pocas', t:'indefinido'},
+        {w:'otro', t:'indefinido'}, {w:'otra', t:'indefinido'}, {w:'otros', t:'indefinido'}, {w:'otras', t:'indefinido'},
+        {w:'varios', t:'indefinido'}, {w:'varias', t:'indefinido'}, {w:'cada', t:'indefinido'},
+        {w:'cualquier', t:'indefinido'}, {w:'bastante', t:'indefinido'}, {w:'demasiado', t:'indefinido'}
+    ];
+
+    // ========== ORACIONES (estructura: targets = array de {text, meta}) ==========
+    // meta siempre incluye al menos {tipo: 'artículo'|'demostrativo'|...} para el desafío
+    // y los campos específicos de nivel 2
+
+    const oracionesArticulos = [
+        {s: "El perro corre por el parque.", targets: [
+            {text:"El", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "La niña lee un cuento.", targets: [
+            {text:"La", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}},
+            {text:"un", meta:{tipo:"artículo", det:"indeterminado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Los pájaros cantan por la mañana.", targets: [
+            {text:"Los", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"plural"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Las flores son muy bonitas.", targets: [
+            {text:"Las", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"plural"}}
+        ]},
+        {s: "Un gato duerme en el sofá.", targets: [
+            {text:"Un", meta:{tipo:"artículo", det:"indeterminado", genero:"masculino", numero:"singular"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Una mariposa vuela alto.", targets: [
+            {text:"Una", meta:{tipo:"artículo", det:"indeterminado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Unos niños juegan al fútbol.", targets: [
+            {text:"Unos", meta:{tipo:"artículo", det:"indeterminado", genero:"masculino", numero:"plural"}}
+        ]},
+        {s: "Unas nubes cubren el cielo.", targets: [
+            {text:"Unas", meta:{tipo:"artículo", det:"indeterminado", genero:"femenino", numero:"plural"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "El sol brilla con fuerza.", targets: [
+            {text:"El", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "La casa es grande y antigua.", targets: [
+            {text:"La", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Los libros están en la estantería.", targets: [
+            {text:"Los", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"plural"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Las estrellas brillan de noche.", targets: [
+            {text:"Las", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"plural"}}
+        ]},
+        {s: "Un coche rojo pasó rápido.", targets: [
+            {text:"Un", meta:{tipo:"artículo", det:"indeterminado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Una manzana cayó del árbol.", targets: [
+            {text:"Una", meta:{tipo:"artículo", det:"indeterminado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Unos zapatos nuevos me gustan.", targets: [
+            {text:"Unos", meta:{tipo:"artículo", det:"indeterminado", genero:"masculino", numero:"plural"}}
+        ]},
+        {s: "Unas sillas rotas hay en el patio.", targets: [
+            {text:"Unas", meta:{tipo:"artículo", det:"indeterminado", genero:"femenino", numero:"plural"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "El profesor explica la lección.", targets: [
+            {text:"El", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "La puerta está abierta.", targets: [
+            {text:"La", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Los alumnos escuchan atentos.", targets: [
+            {text:"Los", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"plural"}}
+        ]},
+        {s: "Las montañas se ven lejanas.", targets: [
+            {text:"Las", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"plural"}}
+        ]},
+        {s: "Un pájaro construye su nido.", targets: [
+            {text:"Un", meta:{tipo:"artículo", det:"indeterminado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Una idea genial surgió ayer.", targets: [
+            {text:"Una", meta:{tipo:"artículo", det:"indeterminado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Unos amigos vendrán a cenar.", targets: [
+            {text:"Unos", meta:{tipo:"artículo", det:"indeterminado", genero:"masculino", numero:"plural"}}
+        ]},
+        {s: "Unas galletas hay en la caja.", targets: [
+            {text:"Unas", meta:{tipo:"artículo", det:"indeterminado", genero:"femenino", numero:"plural"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "El río atraviesa el valle.", targets: [
+            {text:"El", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "La luna ilumina la noche.", targets: [
+            {text:"La", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Los peces nadan en el agua.", targets: [
+            {text:"Los", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"plural"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Las olas rompen en la orilla.", targets: [
+            {text:"Las", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"plural"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Un tren llega a la estación.", targets: [
+            {text:"Un", meta:{tipo:"artículo", det:"indeterminado", genero:"masculino", numero:"singular"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Una canción alegre suena.", targets: [
+            {text:"Una", meta:{tipo:"artículo", det:"indeterminado", genero:"femenino", numero:"singular"}}
+        ]}
+    ];
+
+    const oracionesDemostrativos = [
+        {s: "Este libro es muy interesante.", targets: [{text:"Este", meta:{tipo:"demostrativo", genero:"masculino", numero:"singular", distancia:"cercanía"}}]},
+        {s: "Esta casa tiene jardín.", targets: [{text:"Esta", meta:{tipo:"demostrativo", genero:"femenino", numero:"singular", distancia:"cercanía"}}]},
+        {s: "Estos zapatos me aprietan.", targets: [{text:"Estos", meta:{tipo:"demostrativo", genero:"masculino", numero:"plural", distancia:"cercanía"}}]},
+        {s: "Estas flores huelen bien.", targets: [{text:"Estas", meta:{tipo:"demostrativo", genero:"femenino", numero:"plural", distancia:"cercanía"}}]},
+        {s: "Ese perro ladra mucho.", targets: [{text:"Ese", meta:{tipo:"demostrativo", genero:"masculino", numero:"singular", distancia:"media"}}]},
+        {s: "Esa mesa es de madera.", targets: [{text:"Esa", meta:{tipo:"demostrativo", genero:"femenino", numero:"singular", distancia:"media"}}]},
+        {s: "Esos niños juegan en el parque.", targets: [
+            {text:"Esos", meta:{tipo:"demostrativo", genero:"masculino", numero:"plural", distancia:"media"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Esas nubes anuncian lluvia.", targets: [{text:"Esas", meta:{tipo:"demostrativo", genero:"femenino", numero:"plural", distancia:"media"}}]},
+        {s: "Aquel árbol es muy alto.", targets: [{text:"Aquel", meta:{tipo:"demostrativo", genero:"masculino", numero:"singular", distancia:"lejanía"}}]},
+        {s: "Aquella montaña está nevada.", targets: [{text:"Aquella", meta:{tipo:"demostrativo", genero:"femenino", numero:"singular", distancia:"lejanía"}}]},
+        {s: "Aquellos edificios son modernos.", targets: [{text:"Aquellos", meta:{tipo:"demostrativo", genero:"masculino", numero:"plural", distancia:"lejanía"}}]},
+        {s: "Aquellas estrellas brillan.", targets: [{text:"Aquellas", meta:{tipo:"demostrativo", genero:"femenino", numero:"plural", distancia:"lejanía"}}]},
+        {s: "Este coche es nuevo.", targets: [{text:"Este", meta:{tipo:"demostrativo", genero:"masculino", numero:"singular", distancia:"cercanía"}}]},
+        {s: "Esta canción me gusta.", targets: [{text:"Esta", meta:{tipo:"demostrativo", genero:"femenino", numero:"singular", distancia:"cercanía"}}]},
+        {s: "Estos lápices son de colores.", targets: [{text:"Estos", meta:{tipo:"demostrativo", genero:"masculino", numero:"plural", distancia:"cercanía"}}]},
+        {s: "Estas manzanas están maduras.", targets: [{text:"Estas", meta:{tipo:"demostrativo", genero:"femenino", numero:"plural", distancia:"cercanía"}}]},
+        {s: "Ese reloj marca la hora.", targets: [{text:"Ese", meta:{tipo:"demostrativo", genero:"masculino", numero:"singular", distancia:"media"}}]},
+        {s: "Esa silla está rota.", targets: [{text:"Esa", meta:{tipo:"demostrativo", genero:"femenino", numero:"singular", distancia:"media"}}]},
+        {s: "Esos pájaros vuelan juntos.", targets: [{text:"Esos", meta:{tipo:"demostrativo", genero:"masculino", numero:"plural", distancia:"media"}}]},
+        {s: "Esas nubes son grises.", targets: [{text:"Esas", meta:{tipo:"demostrativo", genero:"femenino", numero:"plural", distancia:"media"}}]},
+        {s: "Aquel barco navega lejos.", targets: [{text:"Aquel", meta:{tipo:"demostrativo", genero:"masculino", numero:"singular", distancia:"lejanía"}}]},
+        {s: "Aquella isla parece desierta.", targets: [{text:"Aquella", meta:{tipo:"demostrativo", genero:"femenino", numero:"singular", distancia:"lejanía"}}]},
+        {s: "Aquellos caballos galopan.", targets: [{text:"Aquellos", meta:{tipo:"demostrativo", genero:"masculino", numero:"plural", distancia:"lejanía"}}]},
+        {s: "Aquellas flores crecen solas.", targets: [{text:"Aquellas", meta:{tipo:"demostrativo", genero:"femenino", numero:"plural", distancia:"lejanía"}}]},
+        {s: "Este problema es difícil.", targets: [{text:"Este", meta:{tipo:"demostrativo", genero:"masculino", numero:"singular", distancia:"cercanía"}}]},
+        {s: "Esta idea es brillante.", targets: [{text:"Esta", meta:{tipo:"demostrativo", genero:"femenino", numero:"singular", distancia:"cercanía"}}]},
+        {s: "Estos días hacen frío.", targets: [{text:"Estos", meta:{tipo:"demostrativo", genero:"masculino", numero:"plural", distancia:"cercanía"}}]},
+        {s: "Estas noticias son buenas.", targets: [{text:"Estas", meta:{tipo:"demostrativo", genero:"femenino", numero:"plural", distancia:"cercanía"}}]},
+        {s: "Ese camino lleva al pueblo.", targets: [{text:"Ese", meta:{tipo:"demostrativo", genero:"masculino", numero:"singular", distancia:"media"}}]},
+        {s: "Esa ventana está abierta.", targets: [{text:"Esa", meta:{tipo:"demostrativo", genero:"femenino", numero:"singular", distancia:"media"}}]}
+    ];
+
+    const oracionesPosesivos = [
+        {s: "Mi hermano estudia mucho.", targets: [{text:"Mi", meta:{tipo:"posesivo", persona:"1ª", numero:"singular", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Mis padres trabajan lejos.", targets: [{text:"Mis", meta:{tipo:"posesivo", persona:"1ª", numero:"plural", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Tu casa es muy bonita.", targets: [{text:"Tu", meta:{tipo:"posesivo", persona:"2ª", numero:"singular", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Tus amigos son simpáticos.", targets: [{text:"Tus", meta:{tipo:"posesivo", persona:"2ª", numero:"plural", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Su perro ladra por la noche.", targets: [{text:"Su", meta:{tipo:"posesivo", persona:"3ª", numero:"singular", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Sus libros están ordenados.", targets: [{text:"Sus", meta:{tipo:"posesivo", persona:"3ª", numero:"plural", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Nuestro equipo ganó el partido.", targets: [
+            {text:"Nuestro", meta:{tipo:"posesivo", persona:"1ª", numero:"singular", genero:"masculino", poseedores:"varios"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Nuestra escuela es grande.", targets: [{text:"Nuestra", meta:{tipo:"posesivo", persona:"1ª", numero:"singular", genero:"femenino", poseedores:"varios"}}]},
+        {s: "Nuestros primos viven cerca.", targets: [{text:"Nuestros", meta:{tipo:"posesivo", persona:"1ª", numero:"plural", genero:"masculino", poseedores:"varios"}}]},
+        {s: "Nuestras ideas son buenas.", targets: [{text:"Nuestras", meta:{tipo:"posesivo", persona:"1ª", numero:"plural", genero:"femenino", poseedores:"varios"}}]},
+        {s: "Vuestro coche es rápido.", targets: [{text:"Vuestro", meta:{tipo:"posesivo", persona:"2ª", numero:"singular", genero:"masculino", poseedores:"varios"}}]},
+        {s: "Vuestra hermana canta bien.", targets: [{text:"Vuestra", meta:{tipo:"posesivo", persona:"2ª", numero:"singular", genero:"femenino", poseedores:"varios"}}]},
+        {s: "Vuestros juguetes están rotos.", targets: [{text:"Vuestros", meta:{tipo:"posesivo", persona:"2ª", numero:"plural", genero:"masculino", poseedores:"varios"}}]},
+        {s: "Vuestras flores se secaron.", targets: [{text:"Vuestras", meta:{tipo:"posesivo", persona:"2ª", numero:"plural", genero:"femenino", poseedores:"varios"}}]},
+        {s: "Mi bicicleta es azul.", targets: [{text:"Mi", meta:{tipo:"posesivo", persona:"1ª", numero:"singular", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Tus zapatos están limpios.", targets: [{text:"Tus", meta:{tipo:"posesivo", persona:"2ª", numero:"plural", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Su mochila pesa mucho.", targets: [{text:"Su", meta:{tipo:"posesivo", persona:"3ª", numero:"singular", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Nuestra abuela cocina rico.", targets: [{text:"Nuestra", meta:{tipo:"posesivo", persona:"1ª", numero:"singular", genero:"femenino", poseedores:"varios"}}]},
+        {s: "Mis gatos duermen juntos.", targets: [{text:"Mis", meta:{tipo:"posesivo", persona:"1ª", numero:"plural", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Tu pelota es de goma.", targets: [{text:"Tu", meta:{tipo:"posesivo", persona:"2ª", numero:"singular", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Sus cuadernos son nuevos.", targets: [{text:"Sus", meta:{tipo:"posesivo", persona:"3ª", numero:"plural", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Nuestro jardín tiene rosas.", targets: [{text:"Nuestro", meta:{tipo:"posesivo", persona:"1ª", numero:"singular", genero:"masculino", poseedores:"varios"}}]},
+        {s: "Vuestra clase es divertida.", targets: [{text:"Vuestra", meta:{tipo:"posesivo", persona:"2ª", numero:"singular", genero:"femenino", poseedores:"varios"}}]},
+        {s: "Nuestros vecinos son amables.", targets: [{text:"Nuestros", meta:{tipo:"posesivo", persona:"1ª", numero:"plural", genero:"masculino", poseedores:"varios"}}]},
+        {s: "Mi lápiz se rompió.", targets: [{text:"Mi", meta:{tipo:"posesivo", persona:"1ª", numero:"singular", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Tus dibujos son creativos.", targets: [{text:"Tus", meta:{tipo:"posesivo", persona:"2ª", numero:"plural", genero:"ambos", poseedores:"uno"}}]},
+        {s: "Su reloj marca bien la hora.", targets: [
+            {text:"Su", meta:{tipo:"posesivo", persona:"3ª", numero:"singular", genero:"ambos", poseedores:"uno"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Nuestras canciones son alegres.", targets: [{text:"Nuestras", meta:{tipo:"posesivo", persona:"1ª", numero:"plural", genero:"femenino", poseedores:"varios"}}]},
+        {s: "Vuestro perro es juguetón.", targets: [{text:"Vuestro", meta:{tipo:"posesivo", persona:"2ª", numero:"singular", genero:"masculino", poseedores:"varios"}}]},
+        {s: "Sus ideas son originales.", targets: [{text:"Sus", meta:{tipo:"posesivo", persona:"3ª", numero:"plural", genero:"ambos", poseedores:"uno"}}]}
+    ];
+
+    const oracionesNumerales = [
+        {s: "Dos gatos duermen en el sofá.", targets: [
+            {text:"Dos", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Tres niños juegan en el parque.", targets: [
+            {text:"Tres", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Cuatro pájaros vuelan juntos.", targets: [{text:"Cuatro", meta:{tipo:"numeral", numtipo:"cardinal"}}]},
+        {s: "Cinco manzanas hay en la cesta.", targets: [
+            {text:"Cinco", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Seis sillas rodean la mesa.", targets: [
+            {text:"Seis", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Siete días tiene la semana.", targets: [
+            {text:"Siete", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Ocho flores crecen en el jardín.", targets: [
+            {text:"Ocho", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Nueve estrellas brillan en el cielo.", targets: [
+            {text:"Nueve", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Diez alumnos terminaron el examen.", targets: [
+            {text:"Diez", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "El primer puesto es el mío.", targets: [
+            {text:"El", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}},
+            {text:"primer", meta:{tipo:"numeral", numtipo:"ordinal"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "La segunda planta está llena.", targets: [
+            {text:"La", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}},
+            {text:"segunda", meta:{tipo:"numeral", numtipo:"ordinal"}}
+        ]},
+        {s: "El tercer día llovió mucho.", targets: [
+            {text:"El", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}},
+            {text:"tercer", meta:{tipo:"numeral", numtipo:"ordinal"}}
+        ]},
+        {s: "La cuarta ventana está rota.", targets: [
+            {text:"La", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}},
+            {text:"cuarta", meta:{tipo:"numeral", numtipo:"ordinal"}}
+        ]},
+        {s: "El quinto libro es el mejor.", targets: [
+            {text:"El", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}},
+            {text:"quinto", meta:{tipo:"numeral", numtipo:"ordinal"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Veinte personas asistieron a la fiesta.", targets: [
+            {text:"Veinte", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Cien pájaros emigran al sur.", targets: [{text:"Cien", meta:{tipo:"numeral", numtipo:"cardinal"}}]},
+        {s: "Un solo alumno faltó hoy.", targets: [{text:"Un", meta:{tipo:"numeral", numtipo:"cardinal"}}]},
+        {s: "La sexta nota es la más alta.", targets: [
+            {text:"La", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}},
+            {text:"sexta", meta:{tipo:"numeral", numtipo:"ordinal"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "El séptimo mes es julio.", targets: [
+            {text:"El", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}},
+            {text:"séptimo", meta:{tipo:"numeral", numtipo:"ordinal"}}
+        ]},
+        {s: "Doce meses tiene el año.", targets: [
+            {text:"Doce", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "La octava canción es lenta.", targets: [
+            {text:"La", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}},
+            {text:"octava", meta:{tipo:"numeral", numtipo:"ordinal"}}
+        ]},
+        {s: "Quince minutos faltan para empezar.", targets: [{text:"Quince", meta:{tipo:"numeral", numtipo:"cardinal"}}]},
+        {s: "El noveno piso tiene vistas.", targets: [
+            {text:"El", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}},
+            {text:"noveno", meta:{tipo:"numeral", numtipo:"ordinal"}}
+        ]},
+        {s: "Treinta alumnos hay en la clase.", targets: [
+            {text:"Treinta", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "La décima pregunta es fácil.", targets: [
+            {text:"La", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}},
+            {text:"décima", meta:{tipo:"numeral", numtipo:"ordinal"}}
+        ]},
+        {s: "Cincuenta árboles plantamos ayer.", targets: [{text:"Cincuenta", meta:{tipo:"numeral", numtipo:"cardinal"}}]},
+        {s: "El undécimo capítulo es corto.", targets: [
+            {text:"El", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}},
+            {text:"undécimo", meta:{tipo:"numeral", numtipo:"ordinal"}}
+        ]},
+        {s: "Seis galletas quedan en la caja.", targets: [
+            {text:"Seis", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "La primera puerta a la derecha.", targets: [
+            {text:"La", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}},
+            {text:"primera", meta:{tipo:"numeral", numtipo:"ordinal"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Cuatro estaciones tiene el año.", targets: [
+            {text:"Cuatro", meta:{tipo:"numeral", numtipo:"cardinal"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]}
+    ];
+
+    const oracionesIndefinidos = [
+        {s: "Algún día viajaré a Asia.", targets: [{text:"Algún", meta:{tipo:"indefinido"}}]},
+        {s: "Ninguna nube hay en el cielo.", targets: [
+            {text:"Ninguna", meta:{tipo:"indefinido"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Todos los niños están contentos.", targets: [
+            {text:"Todos", meta:{tipo:"indefinido"}},
+            {text:"los", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"plural"}}
+        ]},
+        {s: "Muchas personas vinieron a la fiesta.", targets: [
+            {text:"Muchas", meta:{tipo:"indefinido"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Pocos alumnos terminaron el trabajo.", targets: [
+            {text:"Pocos", meta:{tipo:"indefinido"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Otra oportunidad tendrás mañana.", targets: [{text:"Otra", meta:{tipo:"indefinido"}}]},
+        {s: "Varios libros se cayeron al suelo.", targets: [{text:"Varios", meta:{tipo:"indefinido"}}]},
+        {s: "Cada niño recibió un regalo.", targets: [
+            {text:"Cada", meta:{tipo:"indefinido"}},
+            {text:"un", meta:{tipo:"artículo", det:"indeterminado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Cualquier persona puede participar.", targets: [{text:"Cualquier", meta:{tipo:"indefinido"}}]},
+        {s: "Algunas flores se marchitaron.", targets: [{text:"Algunas", meta:{tipo:"indefinido"}}]},
+        {s: "Ningún problema es imposible.", targets: [{text:"Ningún", meta:{tipo:"indefinido"}}]},
+        {s: "Toda la clase aprobó el examen.", targets: [
+            {text:"Toda", meta:{tipo:"indefinido"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Mucho esfuerzo requiere este proyecto.", targets: [
+            {text:"Mucho", meta:{tipo:"indefinido"}},
+            {text:"este", meta:{tipo:"demostrativo", genero:"masculino", numero:"singular", distancia:"cercanía"}}
+        ]},
+        {s: "Poca agua queda en la botella.", targets: [
+            {text:"Poca", meta:{tipo:"indefinido"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Otros niños llegaron tarde.", targets: [{text:"Otros", meta:{tipo:"indefinido"}}]},
+        {s: "Varias ideas surgieron en la reunión.", targets: [
+            {text:"Varias", meta:{tipo:"indefinido"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Alguna solución encontraremos.", targets: [{text:"Alguna", meta:{tipo:"indefinido"}}]},
+        {s: "Todos queremos aprender más.", targets: [{text:"Todos", meta:{tipo:"indefinido"}}]},
+        {s: "Bastante comida hay para todos.", targets: [
+            {text:"Bastante", meta:{tipo:"indefinido"}},
+            {text:"todos", meta:{tipo:"indefinido"}}
+        ]},
+        {s: "Demasiado ruido hay en la calle.", targets: [
+            {text:"Demasiado", meta:{tipo:"indefinido"}},
+            {text:"la", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"singular"}}
+        ]},
+        {s: "Algunos pájaros anidan aquí.", targets: [{text:"Algunos", meta:{tipo:"indefinido"}}]},
+        {s: "Ninguna silla está libre.", targets: [{text:"Ninguna", meta:{tipo:"indefinido"}}]},
+        {s: "Todas las puertas están cerradas.", targets: [
+            {text:"Todas", meta:{tipo:"indefinido"}},
+            {text:"las", meta:{tipo:"artículo", det:"determinado", genero:"femenino", numero:"plural"}}
+        ]},
+        {s: "Muchos árboles crecen en el bosque.", targets: [
+            {text:"Muchos", meta:{tipo:"indefinido"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Pocas nubes cruzan el cielo.", targets: [
+            {text:"Pocas", meta:{tipo:"indefinido"}},
+            {text:"el", meta:{tipo:"artículo", det:"determinado", genero:"masculino", numero:"singular"}}
+        ]},
+        {s: "Otro día será mejor.", targets: [{text:"Otro", meta:{tipo:"indefinido"}}]},
+        {s: "Cualquier momento es bueno.", targets: [{text:"Cualquier", meta:{tipo:"indefinido"}}]},
+        {s: "Cada estrella tiene su historia.", targets: [
+            {text:"Cada", meta:{tipo:"indefinido"}},
+            {text:"su", meta:{tipo:"posesivo", persona:"3ª", numero:"singular", genero:"ambos", poseedores:"uno"}}
+        ]},
+        {s: "Varias canciones me gustan.", targets: [{text:"Varias", meta:{tipo:"indefinido"}}]},
+        {s: "Algún amigo me ayudará.", targets: [{text:"Algún", meta:{tipo:"indefinido"}}]}
+    ];
+
+    // Desafío: todas las oraciones
+    const desafioItems = [
+        ...oracionesArticulos,
+        ...oracionesDemostrativos,
+        ...oracionesPosesivos,
+        ...oracionesNumerales,
+        ...oracionesIndefinidos
+    ];
+
+    // ==================== AUDIO ====================
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTone(freq, duration, type='sine', vol=0.3) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+    function playSuccess() {
+        playTone(523.25, 0.12, 'sine', 0.25);
+        setTimeout(() => playTone(659.25, 0.12, 'sine', 0.25), 100);
+        setTimeout(() => playTone(783.99, 0.18, 'sine', 0.3), 200);
+    }
+    function playError() {
+        playTone(200, 0.15, 'sawtooth', 0.2);
+        setTimeout(() => playTone(150, 0.25, 'sawtooth', 0.25), 120);
+    }
+
+    // ==================== STATE ====================
+    let currentGame = null;
+    let currentLevel = 1;
+    let items = [];
+    let currentIndex = 0;
+    let score = 0;
+    let waiting = false;
+
+    // Multi-target state for current sentence
+    let remainingTargets = [];   // targets still to be found/analyzed
+    let currentTarget = null;    // the one currently being analyzed (level 2 / desafío)
+    let foundCount = 0;
+    let totalInSentence = 0;
+
+    // ==================== UI ====================
+    const screens = {
+        home: document.getElementById('home'),
+        levelSelect: document.getElementById('levelSelect'),
+        game: document.getElementById('game'),
+        end: document.getElementById('end')
+    };
+
+    function showScreen(name) {
+        Object.values(screens).forEach(s => s.classList.remove('active'));
+        screens[name].classList.add('active');
+        document.getElementById('btnBack').style.visibility = name === 'home' ? 'hidden' : 'visible';
+        if (name === 'home') document.getElementById('headerTitle').textContent = 'LOS DETERMINANTES';
+    }
+
+    function showFeedback(emoji, msg, sub='', duration=1200) {
+        const fb = document.getElementById('feedback');
+        document.getElementById('fbEmoji').textContent = emoji;
+        document.getElementById('fbMsg').textContent = msg;
+        document.getElementById('fbSub').textContent = sub;
+        fb.classList.add('show');
+        setTimeout(() => fb.classList.remove('show'), duration);
+    }
+
+    const encourageCorrect = ["¡Excelente!", "¡Muy bien!", "¡Genial!", "¡Perfecto!", "¡Fantástico!", "¡Sigue así!", "¡Brillante!", "¡Increíble!", "¡Lo lograste!", "¡Qué bien!"];
+    const encourageWrong = ["¡Casi!", "¡Inténtalo de nuevo!", "¡Tú puedes!", "¡No te rindas!", "¡Ánimo!"];
+
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // ==================== GAME FLOW ====================
+    function startGame(game, level=1) {
+        currentGame = game;
+        currentLevel = level;
+        score = 0;
+        currentIndex = 0;
+        waiting = false;
+
+        if (game === 'clasificar') {
+            items = shuffle(clasificacionItems);
+            document.getElementById('headerTitle').textContent = 'Clasificar';
+            document.getElementById('classifyContent').style.display = 'flex';
+            document.getElementById('sentenceContent').style.display = 'none';
+        } else if (game === 'desafio') {
+            items = shuffle(desafioItems);
+            document.getElementById('headerTitle').textContent = 'Desafío';
+            document.getElementById('classifyContent').style.display = 'none';
+            document.getElementById('sentenceContent').style.display = 'flex';
+        } else {
+            const map = {
+                articulos: oracionesArticulos,
+                demostrativos: oracionesDemostrativos,
+                posesivos: oracionesPosesivos,
+                numerales: oracionesNumerales,
+                indefinidos: oracionesIndefinidos
+            };
+            items = shuffle(map[game]);
+            const titles = {articulos:'Artículos', demostrativos:'Demostrativos', posesivos:'Posesivos', numerales:'Numerales', indefinidos:'Indefinidos'};
+            document.getElementById('headerTitle').textContent = titles[game] + (level === 2 ? ' · N2' : ' · N1');
+            document.getElementById('classifyContent').style.display = 'none';
+            document.getElementById('sentenceContent').style.display = 'flex';
+        }
+
+        updateProgress();
+        showScreen('game');
+        nextItem();
+    }
+
+    function updateProgress() {
+        const total = items.length;
+        const done = currentIndex;
+        document.getElementById('progressFill').style.width = (done / total * 100) + '%';
+        document.getElementById('progressText').textContent = `${done} / ${total}`;
+        document.getElementById('scoreVal').textContent = score;
+    }
+
+    function nextItem() {
+        if (currentIndex >= items.length) {
+            endGame();
+            return;
+        }
+        waiting = false;
+        currentTarget = null;
+        foundCount = 0;
+        updateProgress();
+
+        if (currentGame === 'clasificar') {
+            renderClassify();
+        } else {
+            renderSentence();
+        }
+    }
+
+    // ========== CLASIFICAR ==========
+    function renderClassify() {
+        const item = items[currentIndex];
+        document.getElementById('classifyWord').textContent = item.w;
+        const opts = document.getElementById('classifyOptions');
+        opts.innerHTML = '';
+        TIPOS.forEach(t => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+            btn.onclick = () => checkClassify(t, btn);
+            opts.appendChild(btn);
+        });
+    }
+
+    function checkClassify(chosen, btn) {
+        if (waiting) return;
+        waiting = true;
+        const correct = items[currentIndex].t;
+        if (chosen === correct) {
+            btn.classList.add('correct');
+            score++;
+            playSuccess();
+            showFeedback('🌟', encourageCorrect[Math.floor(Math.random()*encourageCorrect.length)]);
+            setTimeout(() => { currentIndex++; nextItem(); }, 900);
+        } else {
+            btn.classList.add('wrong');
+            playError();
+            showFeedback('💪', encourageWrong[Math.floor(Math.random()*encourageWrong.length)], `Era: ${correct}`);
+            setTimeout(() => {
+                btn.classList.remove('wrong');
+                waiting = false;
+            }, 1000);
+        }
+    }
+
+    // ========== SENTENCE (multi-target) ==========
+    function renderSentence() {
+        const item = items[currentIndex];
+
+        // En juegos de categoría solo se exigen los determinantes de ese tipo.
+        // En Desafío se exigen TODOS los determinantes presentes en la oración.
+        let rawTargets = item.targets;
+        if (currentGame !== 'desafio') {
+            const tipoMap = {
+                articulos: 'artículo',
+                demostrativos: 'demostrativo',
+                posesivos: 'posesivo',
+                numerales: 'numeral',
+                indefinidos: 'indefinido'
+            };
+            const wanted = tipoMap[currentGame];
+            if (wanted) {
+                rawTargets = item.targets.filter(t => t.meta.tipo === wanted);
+            }
+        }
+
+        remainingTargets = rawTargets.map((t, i) => ({...t, id: i, found: false}));
+        totalInSentence = remainingTargets.length;
+        foundCount = 0;
+        currentTarget = null;
+
+        const instruction = document.getElementById('sentenceInstruction');
+        const wordsDiv = document.getElementById('sentenceWords');
+        const extras = document.getElementById('extraOptions');
+        const targetsInfo = document.getElementById('targetsInfo');
+        extras.classList.remove('visible');
+        extras.innerHTML = '';
+
+        if (currentGame === 'desafio') {
+            instruction.textContent = totalInSentence > 1
+                ? `Toca todos los determinantes (${totalInSentence}) y elige el tipo de cada uno`
+                : 'Toca el determinante y elige su tipo';
+        } else if (currentLevel === 1 || currentGame === 'indefinidos') {
+            instruction.textContent = totalInSentence > 1
+                ? `Toca todos los determinantes de este tipo (${totalInSentence})`
+                : 'Toca la palabra que es el determinante';
+        } else {
+            instruction.textContent = totalInSentence > 1
+                ? `Toca cada determinante y analiza sus características (${totalInSentence})`
+                : 'Toca el determinante y completa el análisis';
+        }
+
+        updateTargetsInfo();
+
+        // Render words
+        const parts = item.s.split(/(\s+)/);
+        wordsDiv.innerHTML = '';
+        parts.forEach(part => {
+            if (part.trim() === '') {
+                const sp = document.createElement('span');
+                sp.textContent = part;
+                wordsDiv.appendChild(sp);
+                return;
+            }
+            const clean = part.replace(/[.,;:!?¿¡]/g, '');
+            const span = document.createElement('span');
+            span.className = 'word';
+            span.textContent = part;
+            span.dataset.clean = clean.toLowerCase();
+            span.onclick = () => onWordTap(span);
+            wordsDiv.appendChild(span);
+        });
+    }
+
+    function updateTargetsInfo() {
+        const el = document.getElementById('targetsInfo');
+        if (totalInSentence <= 1) {
+            el.textContent = '';
+            return;
+        }
+        const left = remainingTargets.filter(t => !t.found).length;
+        if (left === 0) {
+            el.textContent = '¡Todos encontrados!';
+        } else {
+            el.textContent = `Encontrados: ${foundCount} / ${totalInSentence}  ·  Quedan: ${left}`;
+        }
+    }
+
+    function onWordTap(span) {
+        if (waiting) return;
+        // If we are currently analyzing one, ignore new taps on words
+        if (currentTarget !== null) return;
+
+        const clicked = span.dataset.clean;
+        // Find a remaining target that matches this word (case-insensitive)
+        const matchIdx = remainingTargets.findIndex(t => !t.found && t.text.toLowerCase() === clicked);
+
+        if (matchIdx === -1) {
+            // Wrong word
+            span.classList.add('wrong');
+            playError();
+            showFeedback('💪', encourageWrong[Math.floor(Math.random()*encourageWrong.length)]);
+            setTimeout(() => span.classList.remove('wrong'), 700);
+            return;
+        }
+
+        // Correct word found
+        const target = remainingTargets[matchIdx];
+        target.found = true;
+        foundCount++;
+        span.classList.add('correct');
+        playSuccess();
+        updateTargetsInfo();
+
+        // Decide next step
+        const needsAnalysis = (currentGame === 'desafio') ||
+                              (currentLevel === 2 && currentGame !== 'indefinidos');
+
+        if (needsAnalysis) {
+            // Start analysis for this specific target
+            currentTarget = target;
+            span.classList.remove('correct');
+            span.classList.add('analyzing');
+            showAnalysisFor(target, span);
+        } else {
+            // Level 1 style: just mark done
+            span.classList.remove('correct');
+            span.classList.add('done');
+            checkSentenceComplete();
+        }
+    }
+
+    function checkSentenceComplete() {
+        const left = remainingTargets.filter(t => !t.found).length;
+        if (left === 0) {
+            // All targets found (and analyzed if needed)
+            score++;
+            showFeedback('🌟', encourageCorrect[Math.floor(Math.random()*encourageCorrect.length)]);
+            waiting = true;
+            setTimeout(() => { currentIndex++; nextItem(); }, 1000);
+        }
+    }
+
+    function showAnalysisFor(target, spanEl) {
+        const extras = document.getElementById('extraOptions');
+        extras.innerHTML = '';
+        extras.classList.add('visible');
+
+        if (currentGame === 'desafio') {
+            // Only type selection
+            const group = document.createElement('div');
+            group.className = 'extra-group';
+            group.innerHTML = `<h4>¿Qué tipo de determinante es «${target.text}»?</h4>`;
+            const btns = document.createElement('div');
+            btns.className = 'extra-btns';
+            TIPOS.forEach(t => {
+                const b = document.createElement('button');
+                b.className = 'extra-btn';
+                b.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+                b.onclick = () => {
+                    if (waiting) return;
+                    if (t === target.meta.tipo) {
+                        b.classList.add('correct');
+                        playSuccess();
+                        finishCurrentTarget(spanEl, true);
+                    } else {
+                        b.classList.add('wrong');
+                        playError();
+                        showFeedback('💪', '¡Casi!', `Era: ${target.meta.tipo}`);
+                        setTimeout(() => b.classList.remove('wrong'), 800);
+                    }
+                };
+                btns.appendChild(b);
+            });
+            group.appendChild(btns);
+            extras.appendChild(group);
+            return;
+        }
+
+        // Level 2 analysis according to category
+        const meta = target.meta;
+        let groups = [];
+
+        if (currentGame === 'articulos') {
+            groups = [
+                {key:'det', label:`¿Determinado o indeterminado? («${target.text}»)`, opts:['determinado','indeterminado'], correct: meta.det},
+                {key:'genero', label:'¿Género?', opts:['masculino','femenino'], correct: meta.genero},
+                {key:'numero', label:'¿Número?', opts:['singular','plural'], correct: meta.numero}
+            ];
+        } else if (currentGame === 'demostrativos') {
+            groups = [
+                {key:'genero', label:`¿Género? («${target.text}»)`, opts:['masculino','femenino'], correct: meta.genero},
+                {key:'numero', label:'¿Número?', opts:['singular','plural'], correct: meta.numero},
+                {key:'distancia', label:'¿Distancia?', opts:['cercanía','media','lejanía'], correct: meta.distancia}
+            ];
+        } else if (currentGame === 'posesivos') {
+            groups = [
+                {key:'persona', label:`¿Persona? («${target.text}»)`, opts:['1ª','2ª','3ª'], correct: meta.persona},
+                {key:'poseedores', label:'¿Un poseedor o varios poseedores?', opts:['uno','varios'], correct: meta.poseedores},
+                {key:'numero', label:'¿Número?', opts:['singular','plural'], correct: meta.numero},
+                {key:'genero', label:'¿Género?', opts:['masculino','femenino'], correct: meta.genero, flexible: meta.genero === 'ambos'}
+            ];
+        } else if (currentGame === 'numerales') {
+            groups = [
+                {key:'numtipo', label:`¿Cardinal u ordinal? («${target.text}»)`, opts:['cardinal','ordinal'], correct: meta.numtipo}
+            ];
+        }
+
+        const answers = {};
+        groups.forEach(g => {
+            const group = document.createElement('div');
+            group.className = 'extra-group';
+            group.innerHTML = `<h4>${g.label}</h4>`;
+            const btns = document.createElement('div');
+            btns.className = 'extra-btns';
+            g.opts.forEach(opt => {
+                const b = document.createElement('button');
+                b.className = 'extra-btn';
+                // Etiquetas más claras para poseedores
+                if (g.key === 'poseedores') {
+                    b.textContent = opt === 'uno' ? 'Un poseedor' : 'Varios poseedores';
+                } else {
+                    b.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+                }
+                b.onclick = () => {
+                    if (waiting || answers[g.key]) return;
+                    btns.querySelectorAll('.extra-btn').forEach(x => x.classList.remove('selected'));
+                    b.classList.add('selected');
+                    answers[g.key] = opt;
+
+                    if (Object.keys(answers).length === groups.length) {
+                        // Validate all
+                        let allOk = true;
+                        groups.forEach(gg => {
+                            const ans = answers[gg.key];
+                            const ok = gg.flexible ? true : (ans === gg.correct);
+                            if (!ok) allOk = false;
+                            // Visual
+                            const groupEl = [...document.querySelectorAll('.extra-group')].find(el => el.querySelector('h4').textContent === gg.label);
+                            if (groupEl) {
+                                groupEl.querySelectorAll('.extra-btn').forEach(btn => {
+                                    // Comparar por el valor real (ans) no por el texto visible
+                                    const isSelected = btn.classList.contains('selected');
+                                    if (isSelected) {
+                                        btn.classList.add(ok ? 'correct' : 'wrong');
+                                    }
+                                });
+                            }
+                        });
+                        if (allOk) {
+                            playSuccess();
+                            finishCurrentTarget(spanEl, true);
+                        } else {
+                            playError();
+                            showFeedback('💪', encourageWrong[Math.floor(Math.random()*encourageWrong.length)], 'Revisa las opciones');
+                            // Allow retry after a moment
+                            setTimeout(() => {
+                                // Reset answers for retry
+                                Object.keys(answers).forEach(k => delete answers[k]);
+                                document.querySelectorAll('.extra-btn').forEach(b => {
+                                    b.classList.remove('selected','correct','wrong');
+                                });
+                            }, 1200);
+                        }
+                    }
+                };
+                btns.appendChild(b);
+            });
+            group.appendChild(btns);
+            extras.appendChild(group);
+        });
+    }
+
+    function finishCurrentTarget(spanEl, success) {
+        if (spanEl) {
+            spanEl.classList.remove('analyzing', 'correct');
+            spanEl.classList.add('done');
+        }
+        currentTarget = null;
+        document.getElementById('extraOptions').classList.remove('visible');
+        document.getElementById('extraOptions').innerHTML = '';
+        updateTargetsInfo();
+        checkSentenceComplete();
+    }
+
+    function endGame() {
+        const total = items.length;
+        const pct = Math.round((score / total) * 100);
+        document.getElementById('endScore').textContent = `${score} / ${total} (${pct}%)`;
+        let emoji = '🎉', title = '¡Completado!', msg = '¡Buen trabajo!';
+        if (pct >= 90) { emoji='🏆'; title='¡Increíble!'; msg='¡Eres un experto en determinantes!'; }
+        else if (pct >= 70) { emoji='🌟'; title='¡Muy bien!'; msg='¡Sigue practicando para ser el mejor!'; }
+        else if (pct >= 50) { emoji='👍'; title='¡Bien hecho!'; msg='Vas por buen camino.'; }
+        else { emoji='💪'; title='¡Sigue intentando!'; msg='La práctica hace al maestro.'; }
+        document.getElementById('endEmoji').textContent = emoji;
+        document.getElementById('endTitle').textContent = title;
+        document.getElementById('endMessage').textContent = msg;
+        showScreen('end');
+    }
+
+    // ==================== EVENTS ====================
+    document.querySelectorAll('.menu-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const game = card.dataset.game;
+            if (game === 'clasificar' || game === 'desafio' || game === 'indefinidos') {
+                startGame(game, 1);
+            } else {
+                currentGame = game;
+                const titles = {articulos:'Artículos', demostrativos:'Demostrativos', posesivos:'Posesivos', numerales:'Numerales'};
+                document.getElementById('levelTitle').textContent = titles[game];
+                const descs = {
+                    articulos: ['Toca el/los artículo(s)', 'Tipo + género + número de cada uno'],
+                    demostrativos: ['Toca el/los demostrativo(s)', 'Género + número + distancia'],
+                    posesivos: ['Toca el/los posesivo(s)', 'Persona + número + género'],
+                    numerales: ['Toca el/los numeral(es)', 'Cardinal u ordinal']
+                };
+                document.getElementById('level1Desc').textContent = descs[game][0];
+                document.getElementById('level2Desc').textContent = descs[game][1];
+                showScreen('levelSelect');
+            }
+        });
+    });
+
+    document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            startGame(currentGame, parseInt(btn.dataset.level));
+        });
+    });
+
+    document.getElementById('btnBack').addEventListener('click', () => showScreen('home'));
+    document.getElementById('btnHome').addEventListener('click', () => showScreen('home'));
+
+    document.getElementById('btnFullscreen').addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(()=>{});
+        } else {
+            document.exitFullscreen();
+        }
+    });
+
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.body.addEventListener('click', () => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }, {once: true});
+    </script>
+</body>
+</html>
